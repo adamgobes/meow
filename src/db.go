@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 const (
-	host     = "localhost"
+	host     = "db"
 	port     = 5432
 	user     = "postgres"
 	password = "docker"
