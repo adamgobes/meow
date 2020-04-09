@@ -91,6 +91,9 @@ func handleWriteMessage(c *gin.Context) {
 
 func handleGetContacts(c *gin.Context) {
 	var messages []Message
+	var receivers []string
+
+	var users []User
 
 	loggedInUser, err := unsignJWT(c)
 
@@ -98,10 +101,15 @@ func handleGetContacts(c *gin.Context) {
 		return
 	}
 
-	db.Select("DISTINCT(receiver)").Where(&Message{Sender: loggedInUser}).Find(&messages)
+	db.Where(&Message{Sender: loggedInUser}).Find(&messages)
+	for _, message := range messages {
+		receivers = append(receivers, message.Receiver)
+	}
+
+	db.Where("user_id IN (?)", receivers).Find(&users)
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": messages,
+		"data": users,
 	})
 }
 
