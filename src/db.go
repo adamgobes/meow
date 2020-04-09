@@ -1,13 +1,16 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
-const (
-	host     = "db"
+var (
+	host     = os.Getenv("POSTGRES_HOST")
 	port     = 5432
-	user     = "postgres"
-	password = "docker"
-	dbname   = "meow"
+	user     = os.Getenv("POSTGRES_USER")
+	password = os.Getenv("POSTGRES_PASSWORD")
+	dbname   = os.Getenv("POSTGRES_DB")
 )
 
 var psqlInfo string = fmt.Sprintf("host=%s port=%d user=%s "+
