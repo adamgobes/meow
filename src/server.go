@@ -113,12 +113,18 @@ func handleGetContacts(c *gin.Context) {
 	})
 }
 
-func runServer() error {
+func setupRouter() *gin.Engine {
 	r := gin.Default()
 
 	r.POST("/messages/new", handleWriteMessage)
 	r.GET("/messages/:userId", handleGetMessages)
 	r.GET("/contacts", handleGetContacts)
 
-	return r.Run()
+	return r
+}
+
+func runServer() error {
+	router := setupRouter()
+
+	return router.Run()
 }

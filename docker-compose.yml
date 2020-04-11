@@ -32,3 +32,11 @@ services:
             - 5432:5432
         volumes:
             - ~/docker/volumes/postgres:/var/lib/postgresql/data
+    test:
+        build:
+            context: .
+            dockerfile: ./docker/test/Dockerfile
+        volumes:
+            - ./:/app
+        env_file:
+            - ./docker/local/.env

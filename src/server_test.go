@@ -1,17 +1,13 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jinzhu/gorm"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
 )
-
-func getRouter() *gin.Engine {
-	r := gin.Default()
-	return r
-}
 
 func getRegistrationPOSTPayload() string {
 	params := url.Values{}
@@ -21,18 +17,23 @@ func getRegistrationPOSTPayload() string {
 	return params.Encode()
 }
 
-func TestGetContactsEndpoiont(t *testing.T) {
+var TOKEN string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjanl4cGZzd3IwMGd6MDcwOXdrMXg5cnc0IiwiaWF0IjoxNTg2NDYwODMwfQ.WpoAEeONH-4xQK4xzrFEbuhXH82NJ7tJEOYrtRcjRqI"
+
+func TestGetContactsEndpoint(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	r := getRouter()
+	r := setupRouter()
+	mockedDB, _, _ := sqlmock.New()
 
-	r.GET("/contacts", handleGetContacts)
+	db, _ = gorm.Open("postgres", mockedDB)
 
 	req, _ := http.NewRequest("GET", "/contacts", nil)
 
+	req.Header.Add("Authorization", "Bearer "+TOKEN)
+
 	r.ServeHTTP(w, req)
 
-	if w.Code != http.StatusUnauthorized {
+	if w.Code != http.StatusOK {
 		t.Fail()
 	}
 }

@@ -6,3 +6,8 @@ release:
 
 dev:
 	docker-compose up -d db local
+	docker-compose logs -f local
+
+test:
+	docker-compose up -d test
+	docker-compose logs -f test
