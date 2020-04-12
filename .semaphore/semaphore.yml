@@ -10,10 +10,16 @@ agent:
     - name: database
       image: 'postgres:11'
 blocks:
-  - name: Hello World
+  - name: Build and Test
     task:
       jobs:
-        - name: Test job
+        - name: Build job
           commands:
             - checkout
             - docker-compose build test
+        - name: Test
+          commands:
+            - make test
+      env_vars:
+        - name: APP_SECRET
+          value: catsarestatisticians
