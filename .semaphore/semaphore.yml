@@ -7,8 +7,6 @@ agent:
   containers:
     - name: main
       image: 'semaphoreci/node:10'
-    - name: database
-      image: 'postgres:11'
 blocks:
   - name: Build and Test
     task:
@@ -19,7 +17,8 @@ blocks:
             - docker-compose build test
         - name: Test
           commands:
-            - make test
+            - docker-compose up -d test
+            - docker-compose logs -f test
       env_vars:
         - name: APP_SECRET
           value: catsarestatisticians
