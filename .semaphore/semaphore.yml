@@ -17,6 +17,7 @@ blocks:
             - docker-compose build test
         - name: Test
           commands:
+            - checkout
             - docker-compose up -d test
             - docker-compose logs -f test
       env_vars:
