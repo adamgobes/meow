@@ -18,8 +18,7 @@ blocks:
         - name: Test
           commands:
             - checkout
-            - docker-compose up -d test
-            - docker-compose logs -f test
+            - make test
       env_vars:
         - name: APP_SECRET
           value: catsarestatisticians
