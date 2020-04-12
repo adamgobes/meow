@@ -10,7 +10,7 @@ services:
         volumes:
             - ./:/app
         env_file:
-            - ./docker/local/.env
+            - ./.env
     web:
         build:
             context: .
@@ -20,8 +20,6 @@ services:
             - 8000:8000
         volumes:
             - ./:/app
-        env_file:
-            - ./docker/heroku/.env
     db:
         image: postgres
         environment:
@@ -38,5 +36,6 @@ services:
             dockerfile: ./docker/test/Dockerfile
         volumes:
             - ./:/app
-        env_file:
-            - ./docker/local/.env
+        environment:
+            - PORT=${PORT}
+            - APP_SECRET=${APP_SECRET}

@@ -33,6 +33,12 @@ func TestGetContactsEndpoint(t *testing.T) {
 
 	r.ServeHTTP(w, req)
 
+	expected := `{"data":[]}`
+
+	if w.Body.String() != expected {
+		t.Fail()
+	}
+
 	if w.Code != http.StatusOK {
 		t.Fail()
 	}
