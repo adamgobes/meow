@@ -15,9 +15,6 @@ blocks:
           commands:
             - checkout
             - docker-compose build test
-        - name: Test
-          commands:
-            - checkout
             - make test
       env_vars:
         - name: APP_SECRET
