@@ -8,10 +8,10 @@ agent:
     - name: main
       image: 'semaphoreci/node:10'
 blocks:
-  - name: Build and Test
+  - name: Test
     task:
       jobs:
-        - name: Build job
+        - name: Run Tests
           commands:
             - checkout
             - docker-compose build test
@@ -19,3 +19,13 @@ blocks:
       env_vars:
         - name: APP_SECRET
           value: catsarestatisticians
+  - name: Build and Deploy
+    task:
+      jobs:
+        - name: Build + Heroku
+          commands:
+            - checkout
+            - docker-compose build web
+            - docker tag meow_web registry.heroku.com/statcatmeow/web
+            - docker push registry.heroku.com/statcatmeow/web
+            - 'heroku container:release web --app statcatmeow'
