@@ -10,5 +10,3 @@ COPY src/ .
 
 RUN go mod download
 RUN go mod verify
-
-CMD go test -v
