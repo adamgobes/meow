@@ -27,7 +27,7 @@ blocks:
         - name: Build Containers + Release
           commands:
             - checkout
-            - 'heroku:container login'
+            - 'heroku container:login'
             - docker-compose build web
             - docker tag meow_web registry.heroku.com/statcatmeow/web
             - docker push registry.heroku.com/statcatmeow/web
