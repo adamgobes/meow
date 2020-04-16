@@ -16,16 +16,30 @@ blocks:
       env_vars:
         - name: APP_SECRET
           value: catsarestatisticians
-  - name: Deploy
+  - name: Build
     task:
       jobs:
         - name: Build Web Image
           commands:
             - checkout
             - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
-            - checkout
             - docker-compose build web
             - 'docker tag meow_web:latest "$DOCKER_USERNAME"/meow_web:latest'
             - 'docker push "$DOCKER_USERNAME"/meow_web:latest'
       secrets:
         - name: meow-docker
+  - name: Deploy
+    task:
+      secrets:
+        - name: meow-docker
+        - name: meow-heroku
+      jobs:
+        - name: Pull Image + Release
+          commands:
+            - checkout
+            - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
+            - 'docker pull "$DOCKER_USERNAME"/meow_web:latest'
+            - 'heroku container:login'
+            - 'docker tag "$DOCKER_USERNAME"/meow_web:latest registry.heroku.com/statcatmeow/web'
+            - docker push registry.heroku.com/statcatmeow/web
+            - 'heroku container:release web --app statcatmeow'
