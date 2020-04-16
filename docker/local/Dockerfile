@@ -1,10 +1,17 @@
 FROM golang:latest AS builder
-COPY . /app
-WORKDIR /app
+
+ENV APP_HOME /go/src/meow
+
+RUN mkdir -p $APP_HOME
+
+WORKDIR $APP_HOME
+
+COPY src/ .
 
 RUN go mod download
+RUN go mod verify
 RUN go get github.com/githubnemo/CompileDaemon
 
 EXPOSE 8000
 
-ENTRYPOINT CompileDaemon --build="go build -o bin/meow ./src" --command="./bin/meow"
+ENTRYPOINT CompileDaemon --build="go build -o bin/meow" --command="./bin/meow"

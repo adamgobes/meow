@@ -39,8 +39,10 @@ services:
         build:
             context: .
             dockerfile: ./docker/test/Dockerfile
+        container_name: meow_test
         volumes:
             - ./:/app
         environment:
             - PORT=${PORT}
             - APP_SECRET=${APP_SECRET}
+        tty: true

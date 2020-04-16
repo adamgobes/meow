@@ -10,4 +10,4 @@ dev:
 
 test:
 	docker-compose up -d test
-	docker-compose logs -f test
+	docker exec -it meow_test go test -v
