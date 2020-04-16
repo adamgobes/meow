@@ -1,34 +1,23 @@
 version: v1.0
-name: Run in Docker
+name: Meow Test + Deploy
 agent:
   machine:
     type: e1-standard-2
     os_image: ubuntu1804
-  containers:
-    - name: main
-      image: 'semaphoreci/node:10'
 blocks:
-  - name: Test
+  - name: Build
     task:
       jobs:
-        - name: Run Tests
+        - name: Docker Build
           commands:
             - checkout
+            - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
+            - checkout
             - docker-compose build test
-            - make test
+            - 'docker tag meow_test:latest "$DOCKER_USERNAME"/meow_test:latest'
+            - 'docker push "$DOCKER_USERNAME"/meow_test:latest'
       env_vars:
         - name: APP_SECRET
           value: catsarestatisticians
-  - name: Build + Deploy
-    task:
       secrets:
-        - name: meow-heroku
-      jobs:
-        - name: Build Containers + Release
-          commands:
-            - checkout
-            - 'heroku container:login'
-            - docker-compose build web
-            - docker tag meow_web registry.heroku.com/statcatmeow/web
-            - docker push registry.heroku.com/statcatmeow/web
-            - 'heroku container:release web --app statcatmeow'
+        - name: meow-docker
