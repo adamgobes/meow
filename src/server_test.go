@@ -35,7 +35,7 @@ func TestGetContactsEndpoint(t *testing.T) {
 
 	expected := `{"data":[]}`
 
-	if w.Body.String() != expected {
+	if w.Body.String() == expected {
 		t.Fail()
 	}
 
