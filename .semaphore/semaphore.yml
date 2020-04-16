@@ -31,6 +31,8 @@ blocks:
             - 'docker pull "$DOCKER_USERNAME"/meow_test:latest'
             - docker-compose up meow_test -d
             - docker-compose logs -f meow_test
+      secrets:
+        - name: meow-docker
   - name: Deploy
     skip:
       when: branch != 'master'
