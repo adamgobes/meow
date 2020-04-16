@@ -28,6 +28,8 @@ blocks:
             - 'docker push "$DOCKER_USERNAME"/meow_web:latest'
       secrets:
         - name: meow-docker
+    skip:
+      when: branch != 'master'
   - name: Deploy
     task:
       secrets:
@@ -43,3 +45,5 @@ blocks:
             - 'docker tag "$DOCKER_USERNAME"/meow_web:latest registry.heroku.com/statcatmeow/web'
             - docker push registry.heroku.com/statcatmeow/web
             - 'heroku container:release web --app statcatmeow'
+    skip:
+      when: branch != 'master'
