@@ -5,37 +5,18 @@ agent:
     type: e1-standard-2
     os_image: ubuntu1804
 blocks:
-  - name: Build
-    task:
-      jobs:
-        - name: Docker Build Test
-          commands:
-            - checkout
-            - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
-            - checkout
-            - docker-compose build test
-            - 'docker tag meow_test:latest "$DOCKER_USERNAME"/meow_test:latest'
-            - 'docker push "$DOCKER_USERNAME"/meow_test:latest'
-      env_vars:
-        - name: APP_SECRET
-          value: catsarestatisticians
-      secrets:
-        - name: meow-docker
   - name: Test
     task:
       jobs:
-        - name: Run Tests
+        - name: Build + Run Tests
           commands:
             - checkout
-            - 'echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin'
-            - 'docker pull "$DOCKER_USERNAME"/meow_test:latest'
-            - docker-compose up meow_test -d
-            - docker-compose logs -f meow_test
-      secrets:
-        - name: meow-docker
+            - docker-compose build test
+            - make test
+      env_vars:
+        - name: APP_SECRET
+          value: catsarestatisticians
   - name: Deploy
-    skip:
-      when: branch != 'master'
     task:
       jobs:
         - name: Build Web Image
@@ -46,3 +27,5 @@ blocks:
             - docker-compose build web
             - 'docker tag meow_web:latest "$DOCKER_USERNAME"/meow_web:latest'
             - 'docker push "$DOCKER_USERNAME"/meow_web:latest'
+      secrets:
+        - name: meow-docker
