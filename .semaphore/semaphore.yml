@@ -13,9 +13,9 @@ blocks:
             - checkout
             - docker-compose build test
             - make test
-      env_vars:
-        - name: APP_SECRET
-          value: catsarestatisticians
+      env_vars: []
+      secrets:
+        - name: stat-cat-jwt-secret
   - name: Build
     task:
       jobs:
