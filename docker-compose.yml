@@ -8,7 +8,7 @@ services:
         ports:
             - 8000:8000
         volumes:
-            - ./:/app
+            - ./src:/go/src/meow/src
         environment:
             - PORT=${PORT}
             - APP_SECRET=${APP_SECRET}
