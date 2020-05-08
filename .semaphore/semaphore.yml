@@ -13,7 +13,15 @@ blocks:
             - checkout
             - docker-compose build test
             - make test
-      env_vars: []
+      env_vars:
+        - name: POSTGRES_HOST
+          value: db
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: docker
+        - name: POSTGRES_DB
+          value: meow
       secrets:
         - name: stat-cat-jwt-secret
   - name: Build
