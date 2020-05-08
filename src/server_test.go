@@ -28,6 +28,7 @@ var r *gin.Engine
 
 func init() {
 	db, dbError = gorm.Open("postgres", psqlInfo)
+	migrate()
 
 	if dbError != nil {
 		panic("failed to connect database")

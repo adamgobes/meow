@@ -12,7 +12,6 @@ var dbError error
 func main() {
 
 	db, dbError = gorm.Open("postgres", psqlInfo)
-	migrate()
 
 	if dbError != nil {
 		panic("failed to connect database")
