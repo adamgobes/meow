@@ -1,45 +1,99 @@
 package main
 
 import (
-	"github.com/DATA-DOG/go-sqlmock"
+	"bytes"
+	"encoding/json"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
+	"os"
 	"testing"
 )
 
-func getRegistrationPOSTPayload() string {
-	params := url.Values{}
-	params.Add("username", "u1")
-	params.Add("password", "p1")
+var testSender string = "sender_username"
+var testReceiver string = "receiver_username"
 
-	return params.Encode()
+var testContent string = "hello world"
+var newMessageID uint
+
+var tokenRef = jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+	"userId": testSender,
+})
+
+var senderToken, err = tokenRef.SignedString([]byte(os.Getenv("APP_SECRET")))
+
+var r *gin.Engine
+
+func init() {
+	db, dbError = gorm.Open("postgres", psqlInfo)
+
+	if dbError != nil {
+		panic("failed to connect database")
+	}
+
+	r = setupRouter()
 }
 
-var TOKEN string = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjanl4cGZzd3IwMGd6MDcwOXdrMXg5cnc0IiwiaWF0IjoxNTg2NDYwODMwfQ.WpoAEeONH-4xQK4xzrFEbuhXH82NJ7tJEOYrtRcjRqI"
-
-func TestGetContactsEndpoint(t *testing.T) {
+func TestNewMessageEndpoint(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	r := setupRouter()
-	mockedDB, _, _ := sqlmock.New()
+	values := map[string]string{"receiver": testReceiver, "content": testContent}
 
-	db, _ = gorm.Open("postgres", mockedDB)
+	jsonValue, _ := json.Marshal(values)
 
-	req, _ := http.NewRequest("GET", "/contacts", nil)
+	req, _ := http.NewRequest("POST", "/messages/new", bytes.NewBuffer(jsonValue))
 
-	req.Header.Add("Authorization", "Bearer "+TOKEN)
+	req.Header.Add("Authorization", "Bearer "+senderToken)
 
 	r.ServeHTTP(w, req)
 
-	expected := `{"data":[]}`
+	res := struct{ Data Message }{}
 
-	if w.Body.String() != expected {
-		t.Fail()
-	}
+	json.NewDecoder(w.Body).Decode(&res)
+	newMessageID = res.Data.ID
 
 	if w.Code != http.StatusOK {
 		t.Fail()
 	}
+
+	if res.Data.Receiver != testReceiver {
+		t.Fail()
+	}
+
+	if res.Data.Content != testContent {
+		t.Fail()
+	}
+
+}
+
+func TestGetContactsEndpoint(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	req, _ := http.NewRequest("GET", "/contacts", nil)
+
+	req.Header.Add("Authorization", "Bearer "+senderToken)
+
+	r.ServeHTTP(w, req)
+
+	res := struct{ Data []ContactWithPreview }{}
+
+	json.NewDecoder(w.Body).Decode(&res)
+
+	if w.Code != http.StatusOK {
+		t.Fail()
+	}
+
+	if res.Data[0].UserID != testReceiver {
+		t.Fail()
+	}
+
+	if res.Data[0].MessagePreview != testContent {
+		t.Fail()
+	}
+
+	db.Where("id = ?", newMessageID).Unscoped().Delete(Message{})
+	db.Where("user_id = ?", testSender).Unscoped().Delete(User{})
+	db.Where("user_id = ?", testReceiver).Unscoped().Delete(User{})
 }
