@@ -89,11 +89,23 @@ func handleWriteMessage(c *gin.Context) {
 	})
 }
 
+type ContactWithPreview struct {
+	UserID         string
+	MessagePreview string
+}
+
+func appendNoDup(contacts []string, target string) []string {
+	for _, contact := range contacts {
+		if contact == target {
+			return contacts
+		}
+	}
+	return append(contacts, target)
+}
+
 func handleGetContacts(c *gin.Context) {
 	var messages []Message
-	var receivers []string
-
-	var users []User
+	var contactIDs []string
 
 	loggedInUser, err := unsignJWT(c)
 
@@ -101,15 +113,29 @@ func handleGetContacts(c *gin.Context) {
 		return
 	}
 
-	db.Where(&Message{Sender: loggedInUser}).Find(&messages)
+	var allContacts []ContactWithPreview
+
+	// find all messages that the logged in user participated in
+	db.Where(&Message{Sender: loggedInUser}).Or(&Message{Receiver: loggedInUser}).Find(&messages)
+
+	// get a unique list of all contacts
 	for _, message := range messages {
-		receivers = append(receivers, message.Receiver)
+		if loggedInUser == message.Sender {
+			contactIDs = appendNoDup(contactIDs, message.Receiver)
+		} else {
+			contactIDs = appendNoDup(contactIDs, message.Sender)
+		}
 	}
 
-	db.Where("user_id IN (?)", receivers).Find(&users)
+	// for each one of those contacts, find the latest message exchanged between the logged in user and that contact
+	for _, contactID := range contactIDs {
+		db.Where(&Message{Sender: contactID, Receiver: loggedInUser}).Or(&Message{Sender: loggedInUser, Receiver: contactID}).Order("created_at desc").Order(1).Find(&messages)
+		contactWithPreview := ContactWithPreview{UserID: contactID, MessagePreview: messages[0].Content}
+		allContacts = append(allContacts, contactWithPreview)
+	}
 
 	c.JSON(http.StatusOK, gin.H{
-		"data": users,
+		"data": allContacts,
 	})
 }
 

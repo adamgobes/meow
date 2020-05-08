@@ -8,7 +8,7 @@ services:
         ports:
             - 8000:8000
         volumes:
-            - ./src:/go/src/meow/src
+            - ./src:/go/src/meow
         environment:
             - PORT=${PORT}
             - APP_SECRET=${APP_SECRET}
@@ -41,8 +41,12 @@ services:
             dockerfile: ./docker/test/Dockerfile
         container_name: meow_test
         volumes:
-            - ./:/app
+            - ./src:/go/src/meow
         environment:
             - PORT=${PORT}
             - APP_SECRET=${APP_SECRET}
+            - POSTGRES_HOST=${POSTGRES_HOST}
+            - POSTGRES_USER=${POSTGRES_USER}
+            - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+            - POSTGRES_DB=${POSTGRES_DB}
         tty: true

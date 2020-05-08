@@ -5,6 +5,11 @@ import (
 	"os"
 )
 
+func migrate() {
+	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Message{})
+}
+
 var (
 	host     = os.Getenv("POSTGRES_HOST")
 	port     = 5432

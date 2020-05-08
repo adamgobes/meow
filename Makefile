@@ -9,5 +9,5 @@ dev:
 	docker-compose logs -f local
 
 test:
-	docker-compose up -d test
+	docker-compose up -d db test
 	docker exec -it meow_test go test -v
