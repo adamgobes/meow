@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"os"
@@ -90,8 +91,8 @@ func handleWriteMessage(c *gin.Context) {
 }
 
 type ContactWithPreview struct {
-	UserID         string
-	MessagePreview string
+	UserID         string `json:"userId"`
+	MessagePreview string `json:"messagePreview"`
 }
 
 func appendNoDup(contacts []string, target string) []string {
@@ -141,6 +142,14 @@ func handleGetContacts(c *gin.Context) {
 
 func setupRouter() *gin.Engine {
 	r := gin.Default()
+
+	r.Use(cors.New(cors.Config{
+		AllowMethods: []string{"GET", "POST", "HEAD", "PUT", "PATCH"},
+		AllowHeaders: []string{"Origin", "Authorization"},
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "http://localhost:3000" || origin == "https://mystatcat.com"
+		},
+	}))
 
 	r.POST("/messages/new", handleWriteMessage)
 	r.GET("/messages/:userId", handleGetMessages)
