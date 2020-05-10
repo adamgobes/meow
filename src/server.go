@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"strings"
+	"time"
 )
 
 type NewMessagePayload struct {
@@ -91,8 +92,9 @@ func handleWriteMessage(c *gin.Context) {
 }
 
 type ContactWithPreview struct {
-	UserID         string `json:"userId"`
-	MessagePreview string `json:"messagePreview"`
+	UserID         string    `json:"userId"`
+	MessagePreview string    `json:"messagePreview"`
+	SentAt         time.Time `json:"sentAt"`
 }
 
 func appendNoDup(contacts []string, target string) []string {
@@ -114,7 +116,7 @@ func handleGetContacts(c *gin.Context) {
 		return
 	}
 
-	var allContacts []ContactWithPreview
+	allContacts := []ContactWithPreview{}
 
 	// find all messages that the logged in user participated in
 	db.Where(&Message{Sender: loggedInUser}).Or(&Message{Receiver: loggedInUser}).Find(&messages)
@@ -131,7 +133,7 @@ func handleGetContacts(c *gin.Context) {
 	// for each one of those contacts, find the latest message exchanged between the logged in user and that contact
 	for _, contactID := range contactIDs {
 		db.Where(&Message{Sender: contactID, Receiver: loggedInUser}).Or(&Message{Sender: loggedInUser, Receiver: contactID}).Order("created_at desc").Order(1).Find(&messages)
-		contactWithPreview := ContactWithPreview{UserID: contactID, MessagePreview: messages[0].Content}
+		contactWithPreview := ContactWithPreview{UserID: contactID, MessagePreview: messages[0].Content, SentAt: messages[0].CreatedAt}
 		allContacts = append(allContacts, contactWithPreview)
 	}
 
